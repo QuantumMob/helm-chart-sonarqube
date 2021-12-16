@@ -2,13 +2,14 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-deploymentType: "StatefulSet"
+deploymentType: 'StatefulSet'
 
 # If the deployment Type is set to Deployment sonarqube is deployed as a replica set
 # There should not be more than 1 sonarqube instance connected to the same database
-replicaCount: 1
+replicaCount:
+  1
 
- # This will use the default deployment strategy unless it is overriden
+  # This will use the default deployment strategy unless it is overriden
 deploymentStrategy: {}
 # Uncomment this to scheduler pods on priority
 # priorityClassName: "high-priority"
@@ -59,13 +60,13 @@ service:
 
 # also install the nginx ingress helm chart
 nginx:
-  enabled: false
+  enabled: true
 
 ingress:
-  enabled: false
+  enabled: true
   # Used to create an Ingress record.
   hosts:
-    - name: sonarqube.your-org.com
+    - name: sonarqube.qmo.io
       # Different clouds or configurations might need /* as the default path
       path: /
       # For additional control over serviceName and servicePort
@@ -81,7 +82,7 @@ ingress:
   # Reference: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
   # ingressClassName: nginx
 
-# Additional labels for Ingress manifest file
+  # Additional labels for Ingress manifest file
   # labels:
   #  traffic-type: external
   #  traffic-type: internal
@@ -107,12 +108,12 @@ affinity: {}
 # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 # taint a node with the following command to mark it as not schedulable for new pods
 # kubectl taint nodes <node> sonarqube=true:NoSchedule
-# The following statement will tolerate this taint and as such reverse a node for sonarqube
-tolerations: []
-#  - key: "sonarqube"
-#    operator: "Equal"
-#    value: "true"
-#    effect: "NoSchedule"
+# The following statement will tolerate this taint and as such reverse a node for sonarqube# Setting the label from https://docs.sonarqube.org/latest/setup/sonarqube-on-kubernetes/
+tolerations:
+  - key: 'sonarqube'
+    operator: 'Equal'
+    value: 'true'
+    effect: 'NoSchedule'
 
 # Node labels for pod assignment
 # Ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -182,8 +183,8 @@ extraContainers: []
 ## The cacerts file will be set via SONARQUBE_WEB_JVM_OPTS and SONAR_CE_JAVAOPTS
 ##
 ## caCerts:
-  # image: adoptopenjdk/openjdk11:alpine
-  # secret: your-secret
+# image: adoptopenjdk/openjdk11:alpine
+# secret: your-secret
 
 initSysctl:
   enabled: true
@@ -205,7 +206,7 @@ initFs:
 prometheusExporter:
   enabled: true
   # jmx_prometheus_javaagent version to download from Maven Central
-  version: "0.16.0"
+  version: '0.16.0'
   # Alternative full download URL for the jmx_prometheus_javaagent.jar (overrides prometheusExporter.version)
   # downloadURL: ""
   # if you need to ignore TLS certificates for whatever reason enable the following flag
@@ -217,7 +218,7 @@ prometheusExporter:
 
   config:
     rules:
-      - pattern: ".*"
+      - pattern: '.*'
   # Overrides config for the CE process Prometheus exporter (by default, the same rules are used for both the Web and CE processes).
   # ceConfig:
   #   rules:
@@ -262,14 +263,14 @@ plugins:
 ## Values to add to SONARQUBE_WEB_JVM_OPTS
 ##
 # jvmOpts: "-Djava.net.preferIPv4Stack=true"
-jvmOpts: ""
+jvmOpts: ''
 
 ## Values to add to SONAR_CE_JAVAOPTS
-jvmCeOpts: ""
+jvmCeOpts: ''
 
 ## a monitoring passcode needs to be defined in order to get reasonable probe results
 # not setting the monitoring passcode will result in a deployment that will never be ready
-monitoringPasscode: "define_it"
+monitoringPasscode: 'define_it'
 
 ## Environment variables to attach to the pods
 ##
@@ -317,7 +318,8 @@ persistence:
   mounts: []
 
 # In case you want to specify different resources for emptyDir than {}
-emptyDir: {}
+emptyDir:
+  {}
   # Example of resouces that might be used:
   # medium: Memory
   # sizeLimit: 16Mi
@@ -342,11 +344,11 @@ emptyDir: {}
 jdbcOverwrite:
   enable: false
   # The JDBC url of the external DB
-  jdbcUrl: "jdbc:postgresql://myPostgress/myDatabase?socketTimeout=1500"
+  jdbcUrl: 'jdbc:postgresql://myPostgress/myDatabase?socketTimeout=1500'
   # The DB user that should be used for the JDBC connection
-  jdbcUsername: "sonarUser"
+  jdbcUsername: 'sonarUser'
   # Use this if you don't mind the DB password getting stored in plain text within the values file
-  jdbcPassword: "sonarPass"
+  jdbcPassword: 'sonarPass'
   ## Alternatively, use a pre-existing k8s secret containing the DB password
   # jdbcSecretName: "sonarqube-jdbc"
   ## and the secretValueKey of the password found within that secret
@@ -375,9 +377,9 @@ postgresql:
   # existingSecret: ""
   # DEPRECATED: please use the 'jdbcOverwrite' values to connect to an external Postgres DB
   # existingSecretPasswordKey: "postgresql-password"
-  postgresqlUsername: "sonarUser"
-  postgresqlPassword: "sonarPass"
-  postgresqlDatabase: "sonarDB"
+  postgresqlUsername: 'sonarUser'
+  postgresqlPassword: 'sonarPass'
+  postgresqlDatabase: 'sonarDB'
   # Specify the TCP port that PostgreSQL should use
   service:
     port: 5432
