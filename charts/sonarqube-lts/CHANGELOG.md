@@ -1,6 +1,36 @@
 # SonarQube Chart Changelog
 All changes to this chart will be documented in this file.
 
+## [1.0.31]
+* Updated SonarQube LTS to 8.9.10
+
+## [1.0.30]
+* Add documentation for ingress tls
+
+## [1.0.29]
+* updated SonarQube LTS to 8.9.9
+
+## [1.0.28]
+* Add documentation for ingress annotations
+
+## [1.0.27]
+* Fix repository issues with bitnami/postgres
+
+## [1.0.26]
+* updated SonarQube LTS to 8.9.8
+
+## [1.0.25]
+* updated SonarQube LTS to 8.9.7
+
+## [1.0.24]
+* fixed missing `env` key for the install-plugins container in both the Deployment and StatefulSet
+  
+## [1.0.23]
+* updated SonarQube LTS to 8.9.6
+
+## [1.0.22]
+* updated SonarQube LTS to 8.9.5
+
 ## [1.0.21]
 * updated SonarQube LTS to 8.9.4
 

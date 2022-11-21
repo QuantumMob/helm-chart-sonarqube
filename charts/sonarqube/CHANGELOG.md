@@ -1,6 +1,143 @@
 # SonarQube Chart Changelog
 All changes to this chart will be documented in this file.
 
+## [6.2.0]
+* Refactor Ingress to be compatible with static compatibitly test and 1.19 minimum requirement
+
+## [6.1.2]
+* Updated SonarQube to 9.7.1
+
+## [6.1.1]
+* Refactor templating of ConfigMap for sonar.properties
+* Fix the bug where sonarSecretKey was not applied without sonar.properties set
+
+## [6.1.0]
+* Fix the installation of plugins using the standard folder `extensions/plugins` instead of `extensions/downloads` and `lib/common`
+* Remove `plugins.lib` and other small edits in the documentation
+
+## [6.0.0]
+* Updated SonarQube to 9.7.0
+
+## [5.4.1]
+* Fix the right-dash curly brace issue with the additional network policy parameter
+
+## [5.4.0]
+* Allow `tests.image` to be configured and update README accordingly.
+* Allow `tests.initContainers.image` to be configured and update README accordingly.
+
+## [5.3.0]
+* Use the networkPolicy.prometheusNamespace value for the network policy namespace selector
+* Uncomment default value in values.yaml for backwards compatibility
+
+## [5.2.0]
+* Add support for monitoringPasscode passed as a secret and removal of livenessprobe httpheader defined in clear text
+
+## [5.1.0]
+* Bump apiVersion to v2
+* Set the number of allowed replicas to 0 and 1
+* Add documentation for ingress tls
+* Add documentation for sonarProperties and sonarSecretProperties
+* Add the possibility of using a secret for customizing the admin password
+
+## [5.0.6]
+* Updated SonarQube to 9.6.1
+
+## [5.0.0]
+* Updated SonarQube to 9.6.0
+
+## [4.0.3]
+* Add support for Openshift Route labels and annotations
+
+## [4.0.2]
+* Fix issue with Openshift route name to use use fullname instead of name
+
+## [4.0.1]
+* Add documentation for ingress annotations
+
+## [4.0.0]
+* updated SonarQube to 9.5.0
+
+## [3.0.4]
+* Fix issue with additional network policy
+
+## [3.0.3]
+* Add automount service account token flag
+
+## [3.0.2]
+* Add documentation to setup web context via environment variable
+
+## [3.0.1]
+* Fix for issue (#215)[https://github.com/SonarSource/helm-chart-sonarqube/issues/215], adding tolerations and affinity to change password hooks
+
+## [3.0.0]
+* updated SonarQube to 9.4.0
+
+## [2.0.7]
+* Specify location of .netrc file when downloading plugins that require auth
+
+## [2.0.6]
+* Specify service account name in change admin password hook
+
+## [2.0.5]
+* secure admin password in k8s secret
+
+## [2.0.4]
+* no longer automount service account token
+
+## [2.0.3]
+* changed description of dependency postgresql chart
+
+## [2.0.2]
+* changed links to get a better overview of sources
+
+## [2.0.1]
+* Updated all instances of the caCerts enabled check
+
+## [2.0.0]
+* updated SonarQube to 9.3.0
+
+## [1.6.5]
+* add securitycontext to wait-for-db and change-password hook
+
+## [1.6.4]
+* properties are now correctly set
+
+## [1.6.3]
+* `livenessProbe.failureThreshold` was never rendered
+
+## [1.6.2]
+* added missing logic for `caCerts.enabled`
+
+## [1.6.1]
+* fix missing `SONAR_WEB_SYSTEMPASSCODE` environment variable causing failed liveness checks
+
+## [1.5.1]
+* added possibility to define host of a route
+
+## [1.5.0]
+* detached sonarqube edition from version
+
+## [1.4.0]
+* added possibility to define the ingress pathType
+* added network policies
+* added possibility to define ressources for the change admin password hook
+* default permissions for prometheus injector now align with pod fs permissions
+* updated dependencies
+* admin hook now honors web context
+
+## [1.3.0]
+* added support for multiple image pull secrets
+  * added `image.pullSecrets`
+* deprecated support for singular image pull secret
+  * deprecated `image.pullSecret`
+* fixed missing image pull secret in admin hook job
+
+## [1.2.5]
+* updated SonarQube to 9.2.4
+
+## [1.2.4]
+* updated SonarQube to 9.2.3
+
 ## [1.2.3]
 * updated SonarQube to 9.2.2
 
@@ -21,7 +158,7 @@ All changes to this chart will be documented in this file.
 * Use liveness endpoint instead of helth endpoint for liveness probe
 
 ## [1.1.9]
-* fixed wrong scc user reference if name was explicitly set 
+* fixed wrong scc user reference if name was explicitly set
 
 ## [1.1.8]
 * fixed serviceaccount logic

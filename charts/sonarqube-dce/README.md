@@ -10,13 +10,17 @@ Please note that this chart does NOT support SonarQube Community, Developer, and
 
 ## Compatibility
 
-| SonarQube Version | Kubernetes Version | Helm Chart Version |
-|-------------------|--------------------|--------------------|
-| 9.1               | 1.19, 1.20, 1.21   | 0.1                |
+Compatible Sonarqube Version: see chart.appVersion
 
+Compatible Kubernetes Versions: From 1.19 to 1.25
 ## Installing the chart
 
-Please ensure that the value for `ApplicationNodes.jwtSecret` is set with something like `echo -n "your_secret" | openssl dgst -sha256 -hmac "your_key" -binary | base64` and persist this in your `values.yaml`.
+> **_NOTE:_**  Please refer to [the official page](https://docs.sonarqube.org/latest/setup/sonarqube-cluster-on-kubernetes/) for further information on how to install and tune the helm chart specifications.
+
+Prior to installing the chart, please ensure that the `ApplicationNodes.jwtSecret` value is set properly with a HS256 key encoded with base64. In the following, an example on how to generate this key on a Unix system:
+```bash
+echo -n "your_secret" | openssl dgst -sha256 -hmac "your_key" -binary | base64
+```
 
 To install the chart:
 
@@ -115,23 +119,28 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `searchNodes.image.repository` | search image repository | `sonarqube` |
 | `searchNodes.image.tag` | search image tag | `9.2.0-datacenter-search` |
 | `searchNodes.image.pullPolicy` | search image pull policy | `IfNotPresent` |
-| `searchNodes.image.pullSecret` | search imagePullSecret to use for private repository | `nil` |
+| `searchNodes.image.pullSecret` | (DEPRECATED) search imagePullSecret to use for private repository | `nil` |
+| `searchNodes.image.pullSecrets` | search imagePullSecrets to use for private repository | `nil` |
 | `searchNodes.env` | Environment variables to attach to the search pods | `nil` |
+| `searchNodes.sonarProperties` | Custom `sonar.properties` file for Search Nodes | `None` |
+| `searchNodes.sonarSecretProperties` | Additional `sonar.properties` file for Search Nodes to load from a secret | `None` |
+| `searchNodes.sonarSecretKey` | Name of existing secret used for settings encryption | `None` |
 | `searchNodes.searchAuthentication.enabled` | Securing the Search Cluster with basic authentication and TLS in between search nodes | `false` |
 | `searchNodes.searchAuthentication.keyStoreSecret` | Existing PKCS#12 Container as Keystore/Truststore to be used | `""` |
 | `searchNodes.searchAuthentication.keyStorePassword` | Password to Keystore/Truststore used in search nodes (optional) | `""` |
 | `searchNodes.searchAuthentication.keyStorePasswordSecret` | Existing secret for Password to Keystore/Truststore used in search nodes (optional) | `nil` |
 | `searchNodes.searchAuthentication.userPassword` | A User Password that will be used to authenticate against the Search Cluster | `""` |
 | `searchNodes.replicaCount` | Replica count of the Search Nodes | `3` |
+| `searchNodes.podDistributionBudget` | PodDisctributionBudget for the Search Nodes | `maxUnavailable: "33%"` |
 | `searchNodes.securityContext.fsGroup` | Group applied to mounted directories/files on search nodes | `1000` |
 | `searchNodes.containerSecurityContext.runAsUser` | User to run search container in sonarqube pod as | `1000` |
-| `searchNodes.readinessProbe.initialDelaySecond` | ReadinessProbe initial delay for Search Node checking| `60` |
+| `searchNodes.readinessProbe.initialDelaySeconds` | ReadinessProbe initial delay for Search Node checking| `60` |
 | `searchNodes.readinessProbe.periodSeconds` | ReadinessProbe period between checking Search Node | `30` |
 | `searchNodes.readinessProbe.failureThreshold`| ReadinessProbe thresold for marking as failed | `6` |
-| `searchNodes.livenessProbe.initialDelaySecond`| LivenessProbe initial delay for Search Node checking | `60` |
+| `searchNodes.livenessProbe.initialDelaySeconds`| LivenessProbe initial delay for Search Node checking | `60` |
 | `searchNodes.livenessProbe.periodSeconds`| LivenessProbe period between checking Search Node | `30` |
 | `searchNodes.livenessProbe.failureThreshold`| LivenessProbe thresold for marking as dead | `6` |
-| `searchNodes.startupProbe.initialDelaySecond`| StartupProbe initial delay for Search Node checking | `30` |
+| `searchNodes.startupProbe.initialDelaySeconds`| StartupProbe initial delay for Search Node checking | `30` |
 | `searchNodes.startupProbe.periodSeconds`| StartupProbe period between checking Search Node | `10` |
 | `searchNodes.startupProbe.failureThreshold`| StartupProbe thresold for marking as failed | `24` |
 | `searchNodes.resources.requests.memory` | memory request for Search Nodes | `2Gi` |
@@ -144,7 +153,7 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `searchNodes.persistence.accessMode` | Volumes access mode to be set | `ReadWriteOnce` |
 | `searchNodes.persistence.size` | Size of the PVC | `5G` |
 | `searchNodes.persistence.uid` | UID used for init-fs container | `1000` |
-
+| `searchNodes.extraContainers` | Array of extra containers to run alongside | `[]` |
 
 ### App Nodes Configuration
 
@@ -153,20 +162,25 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `ApplicationNodes.image.repository` | app image repository | `sonarqube` |
 | `ApplicationNodes.image.tag` | app image tag | `9.2.0-datacenter-app` |
 | `ApplicationNodes.image.pullPolicy` | app image pull policy | `IfNotPresent` |
-| `ApplicationNodes.image.pullSecret` | app imagePullSecret to use for private repository | `nil` |
+| `ApplicationNodes.image.pullSecret` | (DEPRECATED) app imagePullSecret to use for private repository | `nil` |
+| `ApplicationNodes.image.pullSecrets` | app imagePullSecrets to use for private repository | `nil` |
 | `ApplicationNodes.env` | Environment variables to attach to the app pods | `nil` |
+| `ApplicationNodes.sonarProperties` | Custom `sonar.properties` key-value pairs for App Nodes (e.g., "ApplicationNodes.sonarProperties.sonar.forceAuthentication=true") | `None` |
+| `ApplicationNodes.sonarSecretProperties` | Additional `sonar.properties` key-value pairs for App Nodes to load from a secret | `None` |
+| `ApplicationNodes.sonarSecretKey` | Name of existing secret used for settings encryption | `None` |
 | `ApplicationNodes.replicaCount` | Replica count of the app Nodes | `2` |
+| `ApplicationNodes.podDistributionBudget` | PodDisctributionBudget for the App Nodes | `minAvailable: "50%"` |
 | `ApplicationNodes.securityContext.fsGroup` | Group applied to mounted directories/files on app nodes | `1000` |
 | `ApplicationNodes.containerSecurityContext.runAsUser` | User to run app container in sonarqube pod as | `1000` |
-| `ApplicationNodes.readinessProbe.initialDelaySecond` | ReadinessProbe initial delay for app Node checking| `60` |
+| `ApplicationNodes.readinessProbe.initialDelaySeconds` | ReadinessProbe initial delay for app Node checking| `60` |
 | `ApplicationNodes.readinessProbe.periodSeconds` | ReadinessProbe period between checking app Node | `30` |
 | `ApplicationNodes.readinessProbe.failureThreshold`| ReadinessProbe thresold for marking as failed | `6` |
 | `ApplicationNodes.readinessProbe.sonarWebContext`| SonarQube web context for readinessProbe | `/` |
-| `ApplicationNodes.livenessProbe.initialDelaySecond`| LivenessProbe initial delay for app Node checking | `60` |
+| `ApplicationNodes.livenessProbe.initialDelaySeconds`| LivenessProbe initial delay for app Node checking | `60` |
 | `ApplicationNodes.livenessProbe.periodSeconds`| LivenessProbe period between checking app Node | `30` |
 | `ApplicationNodes.livenessProbe.failureThreshold`| LivenessProbe thresold for marking as dead | `6` |
 | `ApplicationNodes.readinessProbe.sonarWebContext`| SonarQube web context for StartupProbe | `/` |
-| `ApplicationNodes.startupProbe.initialDelaySecond`| StartupProbe initial delay for app Node checking | `30` |
+| `ApplicationNodes.startupProbe.initialDelaySeconds`| StartupProbe initial delay for app Node checking | `30` |
 | `ApplicationNodes.startupProbe.periodSeconds`| StartupProbe period between checking app Node | `10` |
 | `ApplicationNodes.startupProbe.failureThreshold`| StartupProbe thresold for marking as failed | `24` |
 | `ApplicationNodes.readinessProbe.sonarWebContext`| SonarQube web context for StartupProbe | `/` |
@@ -186,8 +200,7 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `ApplicationNodes.prometheusExporter.httpsProxy` | HTTPS proxy for downloading JMX agent | `""` |
 | `ApplicationNodes.prometheusExporter.noProxy` | No proxy for downloading JMX agent | `""` |
 | `ApplicationNodes.prometheusExporter.securityContext` | Security context for downloading the jmx agent | see `values.yaml`|
-| `ApplicationNodes.plugins.install` | List of plugins to install | `[]` |
-| `ApplicationNodes.plugins.lib` | Plugins libray | `[]` |
+| `ApplicationNodes.plugins.install` | Link(s) to the plugin JARs to download and install | `[]` |
 | `ApplicationNodes.plugins.resources` | Plugin Pod resource requests & limits | `{}` |
 | `ApplicationNodes.plugins.httpProxy` | For use behind a corporate proxy when downloading plugins | `""` |
 | `ApplicationNodes.plugins.httpsProxy` | For use behind a corporate proxy when downloading plugins | `""` |
@@ -199,12 +212,13 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `ApplicationNodes.plugins.securityContext` | Security context for the container to download plugins | see `values.yaml |
 | `ApplicationNodes.jvmOpts` | Values to add to SONARQUBE_WEB_JVM_OPTS | `""` |
 | `ApplicationNodes.jvmCeOpts` | Values to add to SONAR_CE_JAVAOPTS | `""` |
-| `ApplicationNodes.jwtSecret` | A HS256 key encoded with base64 | `""` |
+| `ApplicationNodes.jwtSecret` | A HS256 key encoded with base64 (*This value must be set before installing the chart, see [the documentation](https://docs.sonarqube.org/latest/setup/sonarqube-cluster-on-kubernetes/)*) | `""` |
 | `ApplicationNodes.existingJwtSecret` | secret that contains the `jwtSecret` | `nil` |
 | `ApplicationNodes.resources.requests.memory` | memory request for app Nodes | `2Gi` |
 | `ApplicationNodes.resources.requests.cpu` | cpu request for app Nodes | `400m` |
 | `ApplicationNodes.resources.limits.memory` | memory limit for app Nodes. should not be under 4G | `4096M` |
 | `ApplicationNodes.resources.limits.cpu` | cpu limit for app Nodes | `800m` |
+| `ApplicationNodes.extraContainers` | Array of extra containers to run alongside | `[]` |
 
 ### Generic Configuration
 
@@ -217,6 +231,15 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `podLabels` | Map of labels to add to the pods | `{}` |
 | `env` | Environment variables to attach to the pods | `{}`|
 | `annotations` | Sonarqube Pod annotations | `{}` |
+
+
+### NetworkPolicies
+
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
+| `networkPolicy.enabled` | Create NetworkPolicies | `false` |
+| `networkPolicy.prometheusNamespace` | Allow incoming traffic to monitoring ports from this namespace | `nil` |
+| `networkPolicy.additionalNetworkPolicys` | User defined NetworkPolicies (usefull for external database) | `nil` |
 
 ### OpenShift
 
@@ -256,6 +279,7 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `ingress.hosts[0].servicePort` | Optional field to override the default servicePort of a path | `None` |
 | `ingress.tls` | Ingress secrets for TLS certificates | `[]` |
 | `ingress.ingressClassName` | Optional field to configure ingress class name | `None` |
+| `ingress.annotations` | Optional field to add extra annotations to the ingress | `None` |
 
 ### InitContainers
 
@@ -265,6 +289,7 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `initContainers.securityContext` | SecurityContext for init containers | `None` |
 | `initContainers.resources` | Resources for init containers | `{}` |
 | `extraInitContainers` | Extra init containers to e.g. download required artifacts | `{}` |
+| `caCerts.enabled` | Flag for enabling additional CA certificates | `false` |
 | `caCerts.image` | Change init CA certificates container image | `adoptopenjdk/openjdk11:alpine` |
 | `caCerts.secret` | Name of the secret containing additional CA certificates | `None` |
 | `initSysctl.enabled` | Modify k8s worker to conform to system requirements | `true` |
@@ -298,17 +323,16 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
 | `sonarqubeFolder` | Directory name of Sonarqube | `/opt/sonarqube` |
-| `sonarProperties` | Custom `sonar.properties` file | `None` |
-| `sonarSecretProperties` | Additional `sonar.properties` file to load from a secret | `None` |
-| `sonarSecretKey` | Name of existing secret used for settings encryption | `None` |
-| `monitoringPasscode` | Value for sonar.web.systemPasscode. needed for LivenessProbes | `define_it` |
+| `monitoringPasscode` | Value for sonar.web.systemPasscode needed for LivenessProbes (encoded to Base64 format) | `define_it` |
+| `monitoringPasscodeSecretName` | Name of the secret where to load `monitoringPasscode` | `None` |
+| `monitoringPasscodeSecretKey` | Key of an existing secret containing `monitoringPasscode` | `None` |
 | `extraContainers` | Array of extra containers to run alongside the `sonarqube` container (aka. Sidecars) | `[]` |
 
 ### JDBC Overwrite
 
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
-| `jdbcOverwrite.enable` | Enable JDBC overwrites for external Databases (disables `postgresql.enabled`) | `false` |
+| `jdbcOverwrite.enable` | Enable JDBC overwrites for external Databases (disable `postgresql.enabled`) | `false` |
 | `jdbcOverwrite.jdbcUrl` | The JDBC url to connect the external DB | `jdbc:postgresql://myPostgress/myDatabase?socketTimeout=1500` |
 | `jdbcOverwrite.jdbcUsername` | The DB user that should be used for the JDBC connection | `sonarUser` |
 | `jdbcOverwrite.jdbcPassword` | The DB password that should be used for the JDBC connection (Use this if you don't mind the DB password getting stored in plain text within the values file) | `sonarPass` |
@@ -319,7 +343,8 @@ The following table lists the configurable parameters of the Sonarqube chart and
 
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
-| `postgresql.enabled` | Set to `false` to use external server | `true` |
+| `postgresql.enabled` | Set to `false` to use external database server | `true` |
+| `postgresql.existingSecret` | existingSecret Name of existing secret to use for PostgreSQL passwords | `nil` |
 | `postgresql.postgresqlUsername` | Postgresql database user | `sonarUser` |
 | `postgresql.postgresqlPassword` | Postgresql database password | `sonarPass` |
 | `postgresql.postgresqlDatabase` | Postgresql database name | `sonarDB` |
@@ -343,18 +368,20 @@ The following table lists the configurable parameters of the Sonarqube chart and
 
 ### Tests
 
-| Parameter | Description | Default |
-| --------- | ----------- | ------- |
-| `tests.enabled` | Flag that allows tests to be excluded from generated yaml | `true` |
-| `tests.image` | Change init test container image | `dduportal/bats:0.4.0` |
+| Parameter                    | Description | Default |
+|------------------------------| ----------- |--|
+| `tests.enabled`              | Flag that allows tests to be excluded from the generated yaml | `true` |
+| `tests.image`                | Change test container image | `bitnami/minideb-extras`|
+| `tests.initContainers.image` | Change init test container image | `bats/bats:1.2.1` |
 
 ### ServiceAccount
 
-| Parameter | Description | Default |
-| --------- | ----------- | ------- |
-| `serviceAccount.create` | If set to true, create a serviceAccount | `false` |
-| `serviceAccount.name` | Name of the serviceAccount to create/use | `sonarqube-sonarqube` |
-| `serviceAccount.annotations` | Additional serviceAccount annotations | `{}` |
+| Parameter                       | Description                                                                          | Default               |
+|---------------------------------|--------------------------------------------------------------------------------------|-----------------------|
+| `serviceAccount.create`         | If set to true, create a serviceAccount                                              | `false`               |
+| `serviceAccount.name`           | Name of the serviceAccount to create/use                                             | `sonarqube-sonarqube` |
+| `serviceAccount.automountToken` | Manage `automountServiceAccountToken` field for mounting service account credentials | `false`               |
+| `serviceAccount.annotations`    | Additional serviceAccount annotations                                                | `{}`                  |
 
 ### ExtraConfig
 
@@ -370,6 +397,12 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `logging.jsonOutput` | Enable/Disable logging in JSON format | `false` |
 | `account.adminPassword` | Custom new admin password | `admin` |
 | `account.currentAdminPassword` | Current admin password | `admin` |
+| `account.adminPasswordSecretName` | Secret containing `password` (custom password) and `currentPassword` (current password) keys for admin | `None` |
+| `account.resources.requests.memory` | Memory request for Admin hook | `128Mi` |
+| `account.resources.requests.cpu` | CPU request for Admin hook | `100m` |
+| `account.resources.limits.memory` | Memory limit for Admin hook | `128Mi` |
+| `account.resources.limits.cpu` | CPU limit for Admin hook | `100m` |
+| `account.sonarWebContext` | SonarQube web context for Admin hook | `nil` |
 | `curlContainerImage` | Curl container image | `curlimages/curl:latest` |
 | `adminJobAnnotations` | Custom annotations for admin hook Job | `{}` |
 | `terminationGracePeriodSeconds` | Configuration of `terminationGracePeriodSeconds` | `60` |

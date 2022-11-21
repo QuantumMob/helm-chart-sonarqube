@@ -10,10 +10,9 @@ Please note that this chart only supports SonarQube Community, Developer, and En
 
 ## Compatibility
 
-| SonarQube Version | Kubernetes Version | Helm Chart Version |
-|-------------------|--------------------|--------------------|
-| 9.1               | 1.19, 1.20, 1.21   | 1.1                |
+Compatible Sonarqube Version: see chart.appVersion
 
+Compatible Kubernetes Versions: From 1.19 to 1.25
 ## Installing the chart
 
 To install the chart:
@@ -118,7 +117,7 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
 | `deploymentType` | Deployment Type (supported values are `StatefulSet` or `Deployment`) | `StatefulSet` |
-| `replicaCount`   | Number of replicas deployed  | `1` |
+| `replicaCount`   | Number of replicas deployed (supported values are 0 and 1)  | `1` |
 | `deploymentStrategy` | Deployment strategy | `{}` |
 | `priorityClassName` | Schedule pods on priority (e.g. `high-priority`) | `None` |
 | `schedulerName` | Kubernetes scheduler name | `None` |
@@ -129,6 +128,15 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `podLabels` | Map of labels to add to the pods | `{}` |
 | `env` | Environment variables to attach to the pods | `{}`|
 | `annotations` | Sonarqube Pod annotations | `{}` |
+| `edition` | SonarQube Edition to use (e.g. `community`, `developer` or `enterprise`) | `community` |
+
+### NetworkPolicies
+
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
+| `networkPolicy.enabled` | Create NetworkPolicies | `false` |
+| `networkPolicy.prometheusNamespace` | Allow incoming traffic to monitoring ports from this namespace | `nil` |
+| `networkPolicy.additionalNetworkPolicys` | User defined NetworkPolicies (usefull for external database) | `nil` |
 
 ### OpenShift
 
@@ -142,9 +150,10 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
 | `image.repository` | image repository | `sonarqube` |
-| `image.tag` | `sonarqube` image tag. | `9.2.0-community` |
+| `image.tag` | `sonarqube` image tag. | `9.2.4-{{ .Values.edition }}` |
 | `image.pullPolicy` | Image pull policy  | `IfNotPresent` |
-| `image.pullSecret` | imagePullSecret to use for private repository | `None` |
+| `image.pullSecret` | (DEPRECATED) imagePullSecret to use for private repository | `None` |
+| `image.pullSecrets` | imagePullSecrets to use for private repository | `None` |
 
 ### Security
 
@@ -185,27 +194,31 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `ingress.hosts[0].servicePort` | Optional field to override the default servicePort of a path | `None` |
 | `ingress.tls` | Ingress secrets for TLS certificates | `[]` |
 | `ingress.ingressClassName` | Optional field to configure ingress class name | `None` |
+| `ingress.annotations` | Optional field to add extra annotations to the ingress | `None` |
 
 ### Route
 
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
 | `route.enabled` | Flag to enable OpenShift Route | `false` |
+| `route.host` | Host of the route | `""` |
 | `route.tls.termination` | TLS termination type. Currently supported values are `edge` and `passthrough` | `edge` |
+| `route.annotations` | Optional field to add extra annotations to the route | `None` |
+| `route.labels` | Route additional labels | `{}` |
 
 ### Probes
 
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
-| `readinessProbe.initialDelaySecond` | ReadinessProbe initial delay for SonarQube checking | `60` |
+| `readinessProbe.initialDelaySeconds` | ReadinessProbe initial delay for SonarQube checking | `60` |
 | `readinessProbe.periodSeconds` | ReadinessProbe period between checking SonarQube | `30` |
 | `readinessProbe.failureThreshold` | ReadinessProbe threshold for marking as failed | `6` |
 | `readinessProbe.sonarWebContext` | SonarQube web context for readinessProbe | `/` |
-| `livenessProbe.initialDelaySecond` | LivenessProbe initial delay for SonarQube checking | `60` |
+| `livenessProbe.initialDelaySeconds` | LivenessProbe initial delay for SonarQube checking | `60` |
 | `livenessProbe.periodSeconds` | LivenessProbe period between checking SonarQube | `30` |
 | `livenessProbe.sonarWebContext` | SonarQube web context for LivenessProbe | `/` |
 | `livenessProbe.failureThreshold` | LivenessProbe threshold for marking as dead | `6` |
-| `startupProbe.initialDelaySecond` | StartupProbe initial delay for SonarQube checking | `30` |
+| `startupProbe.initialDelaySeconds` | StartupProbe initial delay for SonarQube checking | `30` |
 | `startupProbe.periodSeconds` | StartupProbe period between checking SonarQube | `10` |
 | `startupProbe.sonarWebContext` | SonarQube web context for StartupProbe | `/` |
 | `startupProbe.failureThreshold` | StartupProbe threshold for marking as failed | `24` |
@@ -218,6 +231,7 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `initContainers.securityContext` | SecurityContext for init containers | `None` |
 | `initContainers.resources` | Resources for init containers | `{}` |
 | `extraInitContainers` | Extra init containers to e.g. download required artifacts | `{}` |
+| `caCerts.enabled` | Flag for enabling additional CA certificates | `false` |
 | `caCerts.image` | Change init CA certificates container image | `adoptopenjdk/openjdk11:alpine` |
 | `caCerts.secret` | Name of the secret containing additional CA certificates | `None` |
 | `initSysctl.enabled` | Modify k8s worker to conform to system requirements | `true` |
@@ -253,8 +267,7 @@ The following table lists the configurable parameters of the Sonarqube chart and
 
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
-| `plugins.install` | List of plugin JARs to download and install | `[]` |
-| `plugins.lib` | Plugins libraries to download and install | `[]` |
+| `plugins.install` | Link(s) to the plugin JARs to download and install | `[]` |
 | `plugins.resources` | Plugin Pod resource requests & limits | `{}` |
 | `plugins.httpProxy` | For use behind a corporate proxy when downloading plugins | `""` |
 | `plugins.httpsProxy` | For use behind a corporate proxy when downloading plugins | `""` |
@@ -272,10 +285,12 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | `jvmOpts` | Values to add to SONARQUBE_WEB_JVM_OPTS | `""` |
 | `jvmCeOpts` | Values to add to SONAR_CE_JAVAOPTS | `""` |
 | `sonarqubeFolder` | Directory name of Sonarqube | `/opt/sonarqube` |
-| `sonarProperties` | Custom `sonar.properties` file | `None` |
-| `sonarSecretProperties` | Additional `sonar.properties` file to load from a secret | `None` |
+| `sonarProperties` | Custom `sonar.properties` key-value pairs (e.g., "sonarProperties.sonar.forceAuthentication=true") | `None` |
+| `sonarSecretProperties` | Additional `sonar.properties` key-value pairs to load from a secret | `None` |
 | `sonarSecretKey` | Name of existing secret used for settings encryption | `None` |
-| `monitoringPasscode` | Value for sonar.web.systemPasscode. needed for LivenessProbes | `define_it` |
+| `monitoringPasscode` | Value for sonar.web.systemPasscode needed for LivenessProbes (encoded to Base64 format) | `define_it` |
+| `monitoringPasscodeSecretName` | Name of the secret where to load `monitoringPasscode` | `None` |
+| `monitoringPasscodeSecretKey` | Key of an existing secret containing `monitoringPasscode` | `None` |
 | `extraContainers` | Array of extra containers to run alongside the `sonarqube` container (aka. Sidecars) | `[]` |
 
 ### Resources
@@ -317,9 +332,8 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
 | `postgresql.enabled` | Set to `false` to use external server  | `true` |
-| `postgresql.existingSecret` | (DEPRECATED) Secret containing the password of the external Postgresql server | `null` |
-| `postgresql.existingSecretPasswordKey` | (DEPRECATED) Secret Key containing the password of the external Postgresql server | `postgresql-password` |
-| `postgresql.postgresqlServer` | (DEPRECATED) Hostname of the external Postgresql server | `null` |
+| `postgresql.existingSecret` |  existingSecret Name of existing secret to use for PostgreSQL passwords | `nil` |
+| `postgresql.postgresqlServer` | (DEPRECATED) Hostname of the external Postgresql server | `nil` |
 | `postgresql.postgresqlUsername` | Postgresql database user | `sonarUser` |
 | `postgresql.postgresqlPassword` | Postgresql database password | `sonarPass` |
 | `postgresql.postgresqlDatabase` | Postgresql database name | `sonarDB` |
@@ -343,18 +357,20 @@ The following table lists the configurable parameters of the Sonarqube chart and
 
 ### Tests
 
-| Parameter | Description | Default |
-| --------- | ----------- | ------- |
-| `tests.enabled` | Flag that allows tests to be excluded from generated yaml | `true` |
-| `tests.image` | Change init test container image | `dduportal/bats:0.4.0` |
+| Parameter                    | Description                                                   | Default |
+|------------------------------|---------------------------------------------------------------| ------- |
+| `tests.enabled`              | Flag that allows tests to be excluded from the generated yaml | `true` |
+| `tests.image`                | Change test container image                                   | `bitnami/minideb-extras` |
+| `tests.initContainers.image` | Change test init container image                              | `bats/bats:1.2.1` |
 
 ### ServiceAccount
 
-| Parameter | Description | Default |
-| --------- | ----------- | ------- |
-| `serviceAccount.create` | If set to true, create a serviceAccount | `false` |
-| `serviceAccount.name` | Name of the serviceAccount to create/use | `sonarqube-sonarqube` |
-| `serviceAccount.annotations` | Additional serviceAccount annotations | `{}` |
+| Parameter                       | Description                                                                          | Default               |
+|---------------------------------|--------------------------------------------------------------------------------------|-----------------------|
+| `serviceAccount.create`         | If set to true, create a serviceAccount                                              | `false`               |
+| `serviceAccount.name`           | Name of the serviceAccount to create/use                                             | `sonarqube-sonarqube` |
+| `serviceAccount.automountToken` | Manage `automountServiceAccountToken` field for mounting service account credentials | `false`               |
+| `serviceAccount.annotations`    | Additional serviceAccount annotations                                                | `{}`                  |
 
 ### ExtraConfig
 
@@ -369,6 +385,13 @@ The following table lists the configurable parameters of the Sonarqube chart and
 | --------- | ----------- | ------- |
 | `account.adminPassword` | Custom admin password | `admin` |
 | `account.currentAdminPassword` | Current admin password | `admin` |
+| `account.adminPasswordSecretName` | Secret containing `password` (custom password) and `currentPassword` (current password) keys for admin | `None` |
+| `account.resources.requests.memory` | Memory request for Admin hook | `128Mi` |
+| `account.resources.requests.cpu` | CPU request for Admin hook | `100m` |
+| `account.resources.limits.memory` | Memory limit for Admin hook | `128Mi` |
+| `account.resources.limits.cpu` | CPU limit for Admin hook | `100m` |
+| `account.sonarWebContext` | SonarQube web context for Admin hook | `nil` |
+| `account.securityContext` | SecurityContext for change-password-hook | `{}` |
 | `curlContainerImage` | Curl container image | `curlimages/curl:latest` |
 | `adminJobAnnotations` | Custom annotations for admin hook Job | `{}` |
 | `terminationGracePeriodSeconds` | Configuration of `terminationGracePeriodSeconds` | `60` |
